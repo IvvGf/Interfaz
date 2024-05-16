@@ -53,7 +53,7 @@ const SignUp = () => {
     <div>
       <form onSubmit={handleSubmit}>
         <input
-          placeholder='username'
+          placeholder='Username'
           name='userName'
           onChange={handleChange}       
         />
