@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { SignUp, LogIn, Homepage } from "./pages";
-import{Routes,Route, json} from 'react-router-dom';
+import { SignUp, LogIn,Seleccion_paciente } from "./pages";
+import{Routes,Route} from 'react-router-dom';
 import RequireAuth from "./RequireAuth";
-import Seleccion_paciente from "./pages/Seleccion_paciente";
+
 
 
 const App = () => {
@@ -10,7 +9,7 @@ const App = () => {
     <div>
       <Routes>
         <Route path={'/signup'} element = {<SignUp/>} />
-        <Route path={'/'} element = {<LogIn setToken/>} />
+        <Route path={'/'} element = {<LogIn/>} />
         <Route path={'/seleccion_paciente'} element = {<RequireAuth><Seleccion_paciente/></RequireAuth>} />
       </Routes>
     </div>
