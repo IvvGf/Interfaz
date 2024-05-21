@@ -37,7 +37,7 @@ const SignUp = () => {
           }
         }
       )
-      alert('Check your email for verification link')
+      alert('Check your email for verification link.')
 
 
     } catch (error) {
@@ -78,4 +78,4 @@ const SignUp = () => {
     </div>
   )
 }
-export default SignUp
+export default SignU
