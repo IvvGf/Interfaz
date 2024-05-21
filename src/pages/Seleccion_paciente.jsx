@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Reemplaza useHistory con useNavigate
 import { supabase } from '../client';
 import 'C:/Users/Sofy/Desktop/user-athentication-supabase/src/index.css';
 
@@ -11,6 +12,7 @@ const Seleccion_paciente = () => {
     Sexo: '',
     diagnostico: ''
   });
+  const navigate = useNavigate(); // Usa useNavigate en lugar de useHistory
 
   async function handleSearch() {
     try {
@@ -33,6 +35,14 @@ const Seleccion_paciente = () => {
       alert('No se encontró registro');
     }
   }
+
+  const handleNext = () => {
+    if (!patientId) {
+      alert('Por favor, selecciona un paciente');
+      return;
+    }
+    navigate(`/importacion_datos/${patientId}`); // Navegar con el patientId como parámetro
+  };
 
   return (
     <div style={{ padding: '10px', fontFamily: 'Dongle, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
@@ -97,18 +107,26 @@ const Seleccion_paciente = () => {
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405'}}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#F27405' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#F27405', border: '1px solid #F27405' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
         </div>
+      </div>
+      <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+        <button 
+          onClick={handleNext} 
+          style={{ padding: '10px 20px', fontSize: '20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer' }}>
+          Siguiente
+        </button>
       </div>
     </div>
   );
 };
 
 export default Seleccion_paciente;
+

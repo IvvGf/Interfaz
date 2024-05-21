@@ -1,110 +1,160 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../client';
 import 'C:/Users/Sofy/Desktop/user-athentication-supabase/src/index.css';
 
 const Importacion_datos = () => {
-  const [patientId, setPatientId] = useState('');
-  const [patientData, setPatientData] = useState({
-    nombre: '',
-    apellidos: '',
-    edad: '',
-    Sexo: '',
-    diagnostico: ''
-  });
+  const { patientId } = useParams();
+  const [file, setFile] = useState(null);
+  const [filesLoaded, setFilesLoaded] = useState(false);
+  const [pacsSelected, setPacsSelected] = useState(false);
 
-  async function handleSearch() {
-    try {
+  const handleFileChange = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const filePath = `${patientId}/${selectedFile.name}`;
+      const { data: listData, error: listError } = await supabase
+        .storage
+        .from('imagenes_pacientes')
+        .list(`${patientId}`);
+  
+      if (listError) {
+        console.error('Error listing files:', listError);
+        return;
+      }
+  
+      if (listData.length > 0) {
+        const existingFile = listData[0]; // Obtenemos el primer archivo de la lista
+        const existingFileId = existingFile.id; // Obtenemos el id del archivo existente
+  
+        if (!window.confirm('Precaución: ya se encuentran cargadas las imágenes para este paciente en el PACS, ¿desea sobreescribirlas?')) {
+          return;
+        }
+  
+        // Eliminamos el archivo existente
+        const { error: deleteError } = await supabase
+          .storage
+          .from('imagenes_pacientes')
+          .remove([existingFileId]);
+  
+        if (deleteError) {
+          console.error('Error deleting existing file:', deleteError);
+          return;
+        }
+      }
+  
+      // Subimos el nuevo archivo
       const { data, error } = await supabase
+        .storage
+        .from('imagenes_pacientes')
+        .upload(filePath, selectedFile);
+  
+      if (error) {
+        console.error('Error uploading file:', error);
+        return;
+      }
+  
+      console.log('File uploaded successfully:', data);
+      const fileUrl = supabase.storage.from('imagenes_pacientes').getPublicUrl(filePath).publicURL;
+      const { data: patientData, error: updateError } = await supabase
         .from('pacientes')
-        .select('*')
-        .eq('id', patientId)
-        .single();
-      
-      if (error) throw error;
-      setPatientData({
-        nombre: data.nombre,
-        apellidos: data.apellidos,
-        edad: data.edad,
-        Sexo: data.Sexo,
-        diagnostico: data.diagnostico
-      });
-    } catch (error) {
-      console.error('Error fetching patient data:', error);
-      alert('No se encontró registro');
+        .update({ image_url: fileUrl })
+        .eq('id', patientId);
+  
+      if (updateError) {
+        console.error('Error updating patient data:', updateError);
+      } else {
+        console.log('Patient data updated successfully:', patientData);
+        setFilesLoaded(true);
+      }
     }
-  }
+  };
+  
+
+  const importFromPACS = async () => {
+    const { data: listData, error: listError } = await supabase
+      .storage
+      .from('imagenes_pacientes')
+      .list(`${patientId}`);
+
+    if (listError) {
+      console.error('Error listing files:', listError);
+      return;
+    }
+
+    if (listData.length === 0) {
+      alert('No se encontraron registros preexistentes para este paciente en el PACS. Por favor, importe los datos manualmente.');
+      return;
+    }
+
+    setPacsSelected(true);
+    console.log('Archivos encontrados para el paciente:', listData);
+  };
+
+  const handleManualImportClick = async () => {
+    const { data: listData, error: listError } = await supabase
+      .storage
+      .from('imagenes_pacientes')
+      .list(`${patientId}`);
+  
+    if (listError) {
+      console.error('Error listing files:', listError);
+      return;
+    }
+  
+    if (listData.length > 0) {
+      if (!window.confirm('Precaución: ya se encuentran cargadas las imágenes para este paciente en el PACS, ¿desea sobreescribirlas?')) {
+        return;
+      }
+
+      const existingFile = listData[0];
+      const { error: deleteError } = await supabase
+        .storage
+        .from('imagenes_pacientes')
+        .remove([existingFile.id]);
+  
+      if (deleteError) {
+        console.error('Error deleting existing file:', deleteError);
+        return;
+      }
+    }
+  
+    document.getElementById('file-input').click();
+  };
 
   return (
-    <div style={{ padding: '10px', fontFamily: 'Dongle, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ textAlign: 'left', fontSize: '60px' }}>Captura de tomografía</div>
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', borderRadius: '10px' }}>
-        <div style={{ display: 'flex', width: '100%' }}>
-          <div style={{ marginLeft:'70px', flex: 1, padding: '20px', borderRight: '2px solid black', boxSizing: 'border-box', position: 'relative', fontFamily: 'Dongle, sans-serif' }}>
-            <button 
-            //   onClick={handleSearch} 
-              style={{fontFamily: 'Dongle, sans-serif',marginTop:'150px' ,padding: '0px 20px', fontSize: '30px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer', height:'45px', width:'350px' }}>
-              Importar datos del PACS
-            </button>
-          <div>        
-            <button 
-            //   onClick={handleSearch} 
-              style={{fontFamily: 'Dongle, sans-serif',fontSize:'30px', marginTop:'50px' ,padding: '0px 20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer', height:'45px', width:'350px' }}>
-              Importar datos manualmente
-            </button>
-          </div> 
-          </div>
-          <div style={{ flex: 1, marginLeft: '108px', boxSizing: 'border-box' }}>
-            <div style={{ marginBottom: '0px', fontSize: '40px', fontWeight: 'bold' }}>Datos Generales</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <label style={{ fontSize: '30px', display: 'block', marginBottom: '0px' }}>Nombre:</label>
-                <div style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ccc', backgroundColor:'#F7EBDF4D', height:'20px', width:'300px', fontSize:'27px', lineHeight: '20px' }}>
-                  {patientData.nombre}
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize: '30px', display: 'block', marginBottom: '0px' }}>Apellidos:</label>
-                <div style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ccc', backgroundColor:'#F7EBDF4D', height:'20px', width:'300px',fontSize:'27px', lineHeight: '20px' }}>
-                  {patientData.apellidos}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '30px', display: 'block', marginBottom: '0px' }}>Edad:</label>
-                  <div style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ccc', backgroundColor:'#F7EBDF4D', height:'20px', width:'135px',fontSize:'27px', lineHeight: '20px' }}>
-                    {patientData.edad}
-                  </div>
-                </div>
-                <div>
-                  <label style={{ fontSize: '30px', display: 'block', marginBottom: '0px' }}>Sexo:</label>
-                  <div style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ccc', backgroundColor:'#F7EBDF4D', height:'20px', width:'135px',fontSize:'27px', lineHeight: '20px' }}>
-                    {patientData.Sexo}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label style={{ fontSize: '30px', display: 'block', marginBottom: '0px' }}>Diagnóstico:</label>
-                <div style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ccc', backgroundColor:'#F7EBDF4D', height:'80px', width:'300px',fontSize:'27px', lineHeight: '20px' }}>
-                  {patientData.diagnostico}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div style={{ padding: '20px' }}>
+      <div style={{ marginBottom: '20px' }}>
+        <input
+          type="file"
+          id="file-input"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+        <button
+          onClick={handleManualImportClick}
+          style={{ marginRight: '10px', padding: '10px 20px', fontSize: '16px' }}
+        >
+          Importar Datos Manualmente
+        </button>
+        <button
+          onClick={importFromPACS}
+          style={{ padding: '10px 20px', fontSize: '16px' }}
+        >
+          Importar Datos del PACS
+        </button>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405'}}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#F27405' }}></div>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405' }}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
+      {filesLoaded && (
+        <div style={{ color: 'green', marginTop: '20px', fontSize: '18px' }}>
+          Se ha realizado correctamente la carga de archivos.
         </div>
-      </div>
+      )}
+      {pacsSelected && (
+        <div style={{ color: 'blue', marginTop: '20px', fontSize: '18px' }}>
+          Se han seleccionado adecuadamente los datos del PACS.
+        </div>
+      )}
     </div>
   );
 };
