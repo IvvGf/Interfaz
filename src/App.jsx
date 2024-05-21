@@ -1,4 +1,4 @@
-import { SignUp, LogIn,Seleccion_paciente, Importacion_datos } from "./pages";
+import { SignUp, LogIn,Seleccion_paciente, Importacion_datos} from "./pages";
 import{Routes,Route} from 'react-router-dom';
 import RequireAuth from "./RequireAuth";
 
@@ -13,6 +13,7 @@ const App = () => {
         {/* <Route path={'/seleccion_paciente'} element = {<RequireAuth><Seleccion_paciente/></RequireAuth>} /> */}
         <Route path={'/seleccion_paciente'} element = {<Seleccion_paciente/>} />
         <Route path={'/importacion_datos'} element = {<Importacion_datos/>} />
+        
       </Routes>
     </div>
   )

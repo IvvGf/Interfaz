@@ -42,14 +42,16 @@ const Importacion_datos = () => {
           <div style={{ marginLeft:'70px', flex: 1, padding: '20px', borderRight: '2px solid black', boxSizing: 'border-box', position: 'relative', fontFamily: 'Dongle, sans-serif' }}>
             <button 
             //   onClick={handleSearch} 
-              style={{fontFamily: 'Dongle, sans-serif',marginTop:'50px' ,padding: '10px 20px', fontSize: '25px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer' }}>
+              style={{fontFamily: 'Dongle, sans-serif',marginTop:'150px' ,padding: '0px 20px', fontSize: '30px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer', height:'45px', width:'350px' }}>
               Importar datos del PACS
             </button>
+          <div>        
             <button 
             //   onClick={handleSearch} 
-              style={{fontFamily: 'Dongle, sans-serif',fontSize:'25px', marginTop:'50px' ,padding: '10px 20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer' }}>
-              Importar datos del PACS
+              style={{fontFamily: 'Dongle, sans-serif',fontSize:'30px', marginTop:'50px' ,padding: '0px 20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer', height:'45px', width:'350px' }}>
+              Importar datos manualmente
             </button>
+          </div> 
           </div>
           <div style={{ flex: 1, marginLeft: '108px', boxSizing: 'border-box' }}>
             <div style={{ marginBottom: '0px', fontSize: '40px', fontWeight: 'bold' }}>Datos Generales</div>
@@ -94,7 +96,7 @@ const Importacion_datos = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405'}}></div>
           <div style={{ width: '60px', height: '8px', backgroundColor: '#F27405' }}></div>
-          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405' }}></div>
           <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
           <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc' }}></div>
