@@ -107,7 +107,7 @@ const Seleccion_paciente = () => {
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405'}}></div>
-          <div style={{ width: '60px', height: '8px', backgroundColor: '#F27405', border: '1px solid #F27405' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
           <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
           <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>

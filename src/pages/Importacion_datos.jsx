@@ -10,6 +10,9 @@ const Importacion_datos = () => {
   const [pacsSelected, setPacsSelected] = useState(false);
 
   const handleFileChange = async (e) => {
+    setFilesLoaded(false);
+    setPacsSelected(false);
+
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
@@ -25,21 +28,16 @@ const Importacion_datos = () => {
       }
   
       if (listData.length > 0) {
-        const existingFile = listData[0]; // Obtenemos el primer archivo de la lista
-        const existingFileId = existingFile.id; // Obtenemos el id del archivo existente
-  
         if (!window.confirm('Precaución: ya se encuentran cargadas las imágenes para este paciente en el PACS, ¿desea sobreescribirlas?')) {
           return;
         }
   
-        // Eliminamos el archivo existente
-        const { error: deleteError } = await supabase
-          .storage
-          .from('imagenes_pacientes')
-          .remove([existingFileId]);
+        // Eliminamos todos los archivos que están bajo el path del paciente
+        const filesToRemove = listData.map(file => `${patientId}/${file.name}`);
+        const { error: deleteError } = await supabase.storage.from('imagenes_pacientes').remove(filesToRemove);
   
         if (deleteError) {
-          console.error('Error deleting existing file:', deleteError);
+          console.error('Error borrando el archivo:', deleteError);
           return;
         }
       }
@@ -70,9 +68,11 @@ const Importacion_datos = () => {
       }
     }
   };
-  
 
   const importFromPACS = async () => {
+    setFilesLoaded(false);
+    setPacsSelected(false);
+
     const { data: listData, error: listError } = await supabase
       .storage
       .from('imagenes_pacientes')
@@ -93,6 +93,9 @@ const Importacion_datos = () => {
   };
 
   const handleManualImportClick = async () => {
+    setFilesLoaded(false);
+    setPacsSelected(false);
+
     const { data: listData, error: listError } = await supabase
       .storage
       .from('imagenes_pacientes')
@@ -108,14 +111,12 @@ const Importacion_datos = () => {
         return;
       }
 
-      const existingFile = listData[0];
-      const { error: deleteError } = await supabase
-        .storage
-        .from('imagenes_pacientes')
-        .remove([existingFile.id]);
-  
+      // Eliminamos todos los archivos que están bajo el path del paciente
+      const filesToRemove = listData.map(file => `${patientId}/${file.name}`);
+      const { error: deleteError } = await supabase.storage.from('imagenes_pacientes').remove(filesToRemove);
+
       if (deleteError) {
-        console.error('Error deleting existing file:', deleteError);
+        console.error('Error borrando el archivo:', deleteError);
         return;
       }
     }
@@ -124,39 +125,69 @@ const Importacion_datos = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="file"
-          id="file-input"
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
-        <button
-          onClick={handleManualImportClick}
-          style={{ marginRight: '10px', padding: '10px 20px', fontSize: '16px' }}
+    <div style={{ padding: '10px', fontFamily: 'Dongle, sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ textAlign: 'left', fontSize: '60px' }}>Captura de Tomografía</div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'initial', minHeight: '70vh', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', width: '100%' }}>
+          <div style={{ marginLeft:'80px', flex: 1, padding: '20px', boxSizing: 'border-box', position: 'relative' }}>
+            {/* <div style={{ marginTop:'0px', marginLeft:'20px', fontSize: '40px', marginBottom: '30px' }}>Opciones de Importación</div> */}
+            <button 
+              onClick={handleManualImportClick} 
+              style={{marginTop:'160px', display: 'block', marginBottom: '40px', padding: '10px 20px', fontSize: '20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer' }}
+            >
+              Importar Datos Manualmente
+            </button>
+            <button
+              onClick={importFromPACS}
+              style={{ display: 'block', padding: '10px 20px', fontSize: '20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer' }}
+            >
+              Importar Datos del PACS
+            </button>
+          </div>
+          <div style={{ width: '2px', backgroundColor: 'black', margin: '0 20px' }}></div> {/* Línea vertical negra */}
+          <div style={{ flex: 1, boxSizing: 'border-box' }}>
+            {filesLoaded && (
+              <div style={{ color: 'green', marginBottom: '10px', fontSize: '18px' }}>
+                Se ha realizado correctamente la carga de archivos.
+              </div>
+            )}
+            {pacsSelected && (
+              <div style={{ color: 'blue', marginBottom: '10px', fontSize: '18px' }}>
+                Se han seleccionado adecuadamente los datos del PACS.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '70px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F27405'}}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#F27405', border: '1px solid #F27405' }}></div>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: "#F27405" }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
+          <div style={{ width: '60px', height: '8px', backgroundColor: '#ccc', border: '1px solid #ccc' }}></div>
+          <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#ccc' }}></div>
+        </div>
+      </div>
+      <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+        <button 
+          style={{ padding: '10px 20px', fontSize: '20px', borderRadius: '5px', backgroundColor: '#434573', color: 'white', cursor: 'pointer' }}
         >
-          Importar Datos Manualmente
-        </button>
-        <button
-          onClick={importFromPACS}
-          style={{ padding: '10px 20px', fontSize: '16px' }}
-        >
-          Importar Datos del PACS
+          Siguiente
         </button>
       </div>
-      {filesLoaded && (
-        <div style={{ color: 'green', marginTop: '20px', fontSize: '18px' }}>
-          Se ha realizado correctamente la carga de archivos.
-        </div>
-      )}
-      {pacsSelected && (
-        <div style={{ color: 'blue', marginTop: '20px', fontSize: '18px' }}>
-          Se han seleccionado adecuadamente los datos del PACS.
-        </div>
-      )}
+      <input
+        type="file"
+        id="file-input"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };
 
 export default Importacion_datos;
+

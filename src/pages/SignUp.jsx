@@ -78,4 +78,4 @@ const SignUp = () => {
     </div>
   )
 }
-export default SignU
+export default SignUp
